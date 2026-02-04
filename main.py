@@ -1,0 +1,162 @@
+import os
+import sys
+import json
+import random
+import asyncio
+import argparse
+import traceback
+from tqdm import tqdm
+from utils import load_data, create_question
+from moa import SYNTHESIZE_PROMPT, run_moa
+
+
+PROPOSER_LAYERS = [
+    [   # Layer 1 
+        {"model": "mistral-small-2506", "temperature": 0.7},
+        {"model": "ministral-14b-2512", "temperature": 0.7},
+        {"model": "ministral-8b-2512", "temperature": 0.7},
+        {"model": "ministral-3b-2512", "temperature": 0.7},
+    ],
+]  
+
+# Layer 2
+AGGREGATOR = {"model": "mistral-large-2512", "temperature": 0.0, "max_tokens": 2048}
+
+
+# Logger class for logging to both console and file
+class Logger(object):
+    def __init__(self, filename):
+        self.terminal = sys.stdout
+        self.log = open(filename, "a")
+
+    def write(self, message):
+        self.terminal.write(message)
+        self.log.write(message)
+
+    def flush(self):
+        self.terminal.flush()
+        self.log.flush()
+
+def _atomic_json_dump(obj, path):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    tmp_path = path + ".tmp"
+    with open(tmp_path, 'w') as f:
+        json.dump(obj, f, indent=4)
+    os.replace(tmp_path, path)
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--dataset', type=str, required=True)
+parser.add_argument('--num_samples', type=int, default=None)
+parser.add_argument('--seed', type=int, default=None)
+args = parser.parse_args()
+
+file_name = f"{args.dataset}_{args.num_samples}{'_' + str(args.seed) if args.seed is not None else ''}"
+
+if not os.path.exists('logs'):
+    os.makedirs('logs')
+
+main_log_path = f"logs/{file_name}.log"
+sys.stdout = Logger(main_log_path)
+
+# Output + resume paths
+output_dir = os.path.join(os.getcwd(), 'output')
+os.makedirs(output_dir, exist_ok=True)
+
+output_path = os.path.join(output_dir, f"{file_name}.json")
+progress_path = os.path.join('logs', f"{file_name}.progress.json")
+
+# Load previous results if present (resume)
+results = []
+if os.path.exists(output_path):
+    try:
+        with open(output_path, 'r') as f:
+            results = json.load(f)
+        if not isinstance(results, list):
+            print(f"[WARN] Existing output is not a list. Starting fresh: {output_path}")
+            results = []
+    except Exception as e:
+        print(f"[WARN] Failed to load existing output ({output_path}): {e}. Starting fresh.")
+        results = []
+
+start_no = len(results)
+if start_no > 0:
+    print(f"[INFO] Resuming from sample index {start_no} (already saved {start_no} results).")
+
+# Keep a tiny progress file too (helpful if output gets edited)
+_atomic_json_dump({"next_index": start_no}, progress_path)
+
+test_qa, examplers = load_data(args.dataset)
+
+# Randomly select test samples for quicker testing (remove this part for full eval)
+if args.seed is not None:
+    random.seed(args.seed)
+    
+if args.num_samples is not None and args.num_samples < len(test_qa):
+    test_qa = random.sample(test_qa, args.num_samples)
+
+# Prepare samples to process (skip already completed)
+samples_to_process = list(enumerate(test_qa[start_no:], start=start_no))
+if args.num_samples is not None:
+    samples_to_process = [(no, s) for no, s in samples_to_process if no < args.num_samples]
+    
+# Run samples
+async def main():
+    for no, sample in enumerate(
+        tqdm(test_qa[start_no:], total=len(test_qa), initial=start_no),
+        start=start_no 
+    ):
+        if args.num_samples is not None and no >= args.num_samples:
+            break
+
+        if no == 0:
+            print(f"[INFO] no: {no}")
+        else:    
+            print(f"\n\n[INFO] no: {no}")
+
+        try:
+            question, img_path = create_question(sample, args.dataset)
+            
+            print(question)
+            
+            final_decision = await run_moa(question, PROPOSER_LAYERS, AGGREGATOR, SYNTHESIZE_PROMPT, concurrency=8)
+            
+            if args.dataset == 'medqa':
+                results.append({
+                    'question': question,
+                    'label': sample['answer_idx'],
+                    'answer': sample['answer'],
+                    'options': sample['options'],
+                    'response': final_decision,
+                })
+            else:
+                results.append({
+                    'question': question,
+                    'response': final_decision,
+                })
+
+            # Save after each successful sample
+            _atomic_json_dump(results, output_path)
+            _atomic_json_dump({"next_index": len(results)}, progress_path)
+
+        except KeyboardInterrupt:
+            print("\n[WARN] Interrupted by user (KeyboardInterrupt). Saving progress and exiting...")
+            _atomic_json_dump(results, output_path)
+            _atomic_json_dump({"next_index": len(results)}, progress_path)
+            break
+
+        except Exception as e:
+            print(f"\n[ERROR] Exception at sample index {no}: {type(e).__name__}: {e}")
+            traceback.print_exc()
+            print("[INFO] Saving progress up to last completed sample and exiting...")
+            _atomic_json_dump(results, output_path)
+            _atomic_json_dump({"next_index": len(results)}, progress_path)
+            break
+        
+    # Final save (in case loop ends normally)
+    _atomic_json_dump(results, output_path)
+    _atomic_json_dump({"next_index": len(results)}, progress_path)
+    print(f"\n[INFO] Done. Saved {len(results)} samples to: {output_path}")
+
+
+if __name__ == "__main__":
+    asyncio.run(main())

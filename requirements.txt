@@ -1,4 +1,6 @@
 mistralai
+prettytable
+python-dotenv
 openai
 fire
 loguru

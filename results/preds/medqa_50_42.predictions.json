@@ -1,0 +1,252 @@
+[
+    {
+        "idx": 0,
+        "label": "A",
+        "extracted_answer": "B"
+    },
+    {
+        "idx": 1,
+        "label": "A",
+        "extracted_answer": "A"
+    },
+    {
+        "idx": 2,
+        "label": "A",
+        "extracted_answer": "A"
+    },
+    {
+        "idx": 3,
+        "label": "E",
+        "extracted_answer": "E"
+    },
+    {
+        "idx": 4,
+        "label": "C",
+        "extracted_answer": "C"
+    },
+    {
+        "idx": 5,
+        "label": "D",
+        "extracted_answer": "A"
+    },
+    {
+        "idx": 6,
+        "label": "A",
+        "extracted_answer": "A"
+    },
+    {
+        "idx": 7,
+        "label": "D",
+        "extracted_answer": "D"
+    },
+    {
+        "idx": 8,
+        "label": "D",
+        "extracted_answer": "D"
+    },
+    {
+        "idx": 9,
+        "label": "A",
+        "extracted_answer": "A"
+    },
+    {
+        "idx": 10,
+        "label": "E",
+        "extracted_answer": "E"
+    },
+    {
+        "idx": 11,
+        "label": "C",
+        "extracted_answer": "C"
+    },
+    {
+        "idx": 12,
+        "label": "A",
+        "extracted_answer": "A"
+    },
+    {
+        "idx": 13,
+        "label": "D",
+        "extracted_answer": "D"
+    },
+    {
+        "idx": 14,
+        "label": "C",
+        "extracted_answer": "C"
+    },
+    {
+        "idx": 15,
+        "label": "D",
+        "extracted_answer": "D"
+    },
+    {
+        "idx": 16,
+        "label": "B",
+        "extracted_answer": "C"
+    },
+    {
+        "idx": 17,
+        "label": "B",
+        "extracted_answer": "B"
+    },
+    {
+        "idx": 18,
+        "label": "B",
+        "extracted_answer": "B"
+    },
+    {
+        "idx": 19,
+        "label": "B",
+        "extracted_answer": "C"
+    },
+    {
+        "idx": 20,
+        "label": "C",
+        "extracted_answer": "C"
+    },
+    {
+        "idx": 21,
+        "label": "D",
+        "extracted_answer": "D"
+    },
+    {
+        "idx": 22,
+        "label": "E",
+        "extracted_answer": "E"
+    },
+    {
+        "idx": 23,
+        "label": "C",
+        "extracted_answer": "C"
+    },
+    {
+        "idx": 24,
+        "label": "A",
+        "extracted_answer": "A"
+    },
+    {
+        "idx": 25,
+        "label": "B",
+        "extracted_answer": "B"
+    },
+    {
+        "idx": 26,
+        "label": "E",
+        "extracted_answer": "E"
+    },
+    {
+        "idx": 27,
+        "label": "B",
+        "extracted_answer": "B"
+    },
+    {
+        "idx": 28,
+        "label": "C",
+        "extracted_answer": "C"
+    },
+    {
+        "idx": 29,
+        "label": "D",
+        "extracted_answer": "D"
+    },
+    {
+        "idx": 30,
+        "label": "C",
+        "extracted_answer": "C"
+    },
+    {
+        "idx": 31,
+        "label": "E",
+        "extracted_answer": "E"
+    },
+    {
+        "idx": 32,
+        "label": "C",
+        "extracted_answer": "A"
+    },
+    {
+        "idx": 33,
+        "label": "C",
+        "extracted_answer": "C"
+    },
+    {
+        "idx": 34,
+        "label": "C",
+        "extracted_answer": "A"
+    },
+    {
+        "idx": 35,
+        "label": "E",
+        "extracted_answer": "E"
+    },
+    {
+        "idx": 36,
+        "label": "A",
+        "extracted_answer": "A"
+    },
+    {
+        "idx": 37,
+        "label": "E",
+        "extracted_answer": "E"
+    },
+    {
+        "idx": 38,
+        "label": "C",
+        "extracted_answer": "C"
+    },
+    {
+        "idx": 39,
+        "label": "A",
+        "extracted_answer": "C"
+    },
+    {
+        "idx": 40,
+        "label": "C",
+        "extracted_answer": "C"
+    },
+    {
+        "idx": 41,
+        "label": "A",
+        "extracted_answer": "A"
+    },
+    {
+        "idx": 42,
+        "label": "E",
+        "extracted_answer": "E"
+    },
+    {
+        "idx": 43,
+        "label": "C",
+        "extracted_answer": "C"
+    },
+    {
+        "idx": 44,
+        "label": "A",
+        "extracted_answer": "A"
+    },
+    {
+        "idx": 45,
+        "label": "B",
+        "extracted_answer": "B"
+    },
+    {
+        "idx": 46,
+        "label": "A",
+        "extracted_answer": "A"
+    },
+    {
+        "idx": 47,
+        "label": "E",
+        "extracted_answer": "E"
+    },
+    {
+        "idx": 48,
+        "label": "C",
+        "extracted_answer": "C"
+    },
+    {
+        "idx": 49,
+        "label": "E",
+        "extracted_answer": "E"
+    }
+]

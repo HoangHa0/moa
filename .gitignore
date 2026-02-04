@@ -5,5 +5,5 @@ __pycache__/
 .venv
 
 # Others
-.api
+.api-key
 .notes
