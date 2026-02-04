@@ -8,18 +8,21 @@ import traceback
 from tqdm import tqdm
 from utils import load_data, create_question
 from moa import SYNTHESIZE_PROMPT, run_moa
+ 
 
+AGENTS = [
+    {"model": "mistral-small-2506", "temperature": 0.7},
+    {"model": "ministral-14b-2512", "temperature": 0.7},
+    {"model": "ministral-8b-2512", "temperature": 0.7},
+    {"model": "ministral-3b-2512", "temperature": 0.7},
+]
 
 PROPOSER_LAYERS = [
-    [   # Layer 1 
-        {"model": "mistral-small-2506", "temperature": 0.7},
-        {"model": "ministral-14b-2512", "temperature": 0.7},
-        {"model": "ministral-8b-2512", "temperature": 0.7},
-        {"model": "ministral-3b-2512", "temperature": 0.7},
-    ],
-]  
+    AGENTS,  # Layer 1
+    AGENTS,  # Layer 2
+]
 
-# Layer 2
+# Layer 3
 AGGREGATOR = {"model": "mistral-large-2512", "temperature": 0.0, "max_tokens": 2048}
 
 
@@ -45,7 +48,7 @@ def _atomic_json_dump(obj, path):
     os.replace(tmp_path, path)
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--dataset', type=str, required=True)
+parser.add_argument('--dataset', default='medqa', type=str)
 parser.add_argument('--num_samples', type=int, default=None)
 parser.add_argument('--seed', type=int, default=None)
 args = parser.parse_args()
