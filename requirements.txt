@@ -1,3 +1,4 @@
+mistralai
 openai
 fire
 loguru

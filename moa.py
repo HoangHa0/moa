@@ -1,4 +1,4 @@
-# Mixture-of-Agents in 50 lines of code
+# Mixture-of-Agents: 2 layers
 import asyncio
 import os
 import together
