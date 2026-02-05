@@ -122,6 +122,7 @@ async def main():
             print(question)
             
             final_decision = await run_moa(question, PROPOSER_LAYERS, AGGREGATOR, SYNTHESIZE_PROMPT, concurrency=2)
+            await asyncio.sleep(0.3)  # Slight delay between samples
             
             if args.dataset == 'medqa':
                 results.append({
@@ -153,7 +154,7 @@ async def main():
             print("[INFO] Saving progress up to last completed sample and exiting...")
             _atomic_json_dump(results, output_path)
             _atomic_json_dump({"next_index": len(results)}, progress_path)
-            break
+            break  
         
     # Final save (in case loop ends normally)
     _atomic_json_dump(results, output_path)

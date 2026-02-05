@@ -22,41 +22,26 @@ async def _run_llm(client: Mistral, agent: Dict[str, Any], user_prompt: str, sys
     messages.append(UserMessage(content=user_prompt))
 
     max_retries = 6
-    backoff = 1.0
+    base_sleep = 1.0
+    last_err = None
 
     for attempt in range(max_retries):
         try:
-            response = await client.chat.complete_async(
+            resp = await client.chat.complete_async(
                 model=agent["model"],
                 messages=messages,
                 temperature=agent.get("temperature", 0.7),
                 max_tokens=agent.get("max_tokens", 512),
             )
-            return response.choices[0].message.content
-        
+            return resp.choices[0].message.content
+
         except SDKError as e:
-            # Handle rate limit errors with exponential backoff
-            status = getattr(e, "status_code", None)
-            if status is None and hasattr(e, "http_response"):
-                status = getattr(e.http_response, "status_code", None)
+            last_err = e
+            sleep_s = base_sleep * (2 ** attempt) + random.uniform(0, 0.5)
+            await asyncio.sleep(sleep_s)
+            continue
 
-            if status == 429:
-                # exponential backoff + small jitter
-                sleep_s = backoff * (2 ** attempt) + random.uniform(0, 0.3)
-                await asyncio.sleep(sleep_s)
-                continue
-
-            raise 
-
-    raise RuntimeError(f"Rate-limited too many times for model={agent['model']} after {max_retries} retries")
-
-    response = await client.chat.complete_async(
-        model=agent["model"],
-        messages=messages,
-        temperature=agent.get("temperature", 0.7),
-        max_tokens=agent.get("max_tokens", 512),
-    )
-    return response.choices[0].message.content
+    raise RuntimeError(f"Retry exhausted for model={agent['model']}. Last error: {last_err}")
 
 def _pack(prev_responses: list[str]) -> str:
     """Pack previous responses into a single string."""
