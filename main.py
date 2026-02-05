@@ -121,7 +121,7 @@ async def main():
             
             print(question)
             
-            final_decision = await run_moa(question, PROPOSER_LAYERS, AGGREGATOR, SYNTHESIZE_PROMPT, concurrency=8)
+            final_decision = await run_moa(question, PROPOSER_LAYERS, AGGREGATOR, SYNTHESIZE_PROMPT, concurrency=2)
             
             if args.dataset == 'medqa':
                 results.append({
