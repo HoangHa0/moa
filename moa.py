@@ -1,9 +1,10 @@
 import os
 import asyncio
+import random
 from typing import Optional, List, Dict, Any
 
 from mistralai import Mistral
-from mistralai.models import SystemMessage, UserMessage
+from mistralai.models import SystemMessage, UserMessage, SDKError
 
 
 client = Mistral(api_key=os.environ.get("MISTRAL_API_KEY"))
@@ -19,6 +20,35 @@ async def _run_llm(client: Mistral, agent: Dict[str, Any], user_prompt: str, sys
     if sys:
         messages.append(SystemMessage(content=sys))
     messages.append(UserMessage(content=user_prompt))
+
+    max_retries = 6
+    backoff = 1.0
+
+    for attempt in range(max_retries):
+        try:
+            response = await client.chat.complete_async(
+                model=agent["model"],
+                messages=messages,
+                temperature=agent.get("temperature", 0.7),
+                max_tokens=agent.get("max_tokens", 512),
+            )
+            return response.choices[0].message.content
+        
+        except SDKError as e:
+            # Handle rate limit errors with exponential backoff
+            status = getattr(e, "status_code", None)
+            if status is None and hasattr(e, "http_response"):
+                status = getattr(e.http_response, "status_code", None)
+
+            if status == 429:
+                # exponential backoff + small jitter
+                sleep_s = backoff * (2 ** attempt) + random.uniform(0, 0.3)
+                await asyncio.sleep(sleep_s)
+                continue
+
+            raise 
+
+    raise RuntimeError(f"Rate-limited too many times for model={agent['model']} after {max_retries} retries")
 
     response = await client.chat.complete_async(
         model=agent["model"],
