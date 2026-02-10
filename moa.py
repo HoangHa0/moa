@@ -151,6 +151,14 @@ def _get_gemini_client():
 
 
 # ============================
+# Logging helper
+# ============================
+
+# Default no-op logger
+def _noop_log(msg):
+    pass 
+
+# ============================
 # Prompt helpers
 # ============================
 
@@ -260,6 +268,7 @@ def run_moa(
     aggregator: Dict[str, Any],
     synthesize_prompt: str = SYNTHESIZE_PROMPT,
     return_intermediate: bool = False,
+    log: Any = _noop_log,
 ) -> str | tuple[str, List[List[str]]]:
     """MoA with arbitrary per-layer, per-agent providers/models."""
     all_layer_results: List[List[str]] = []
@@ -267,16 +276,26 @@ def run_moa(
     # Layer 1
     results = run_layer(proposer_layers[0], None, user_prompt)
     all_layer_results.append(results)
+    
+    log(f"\n[INFO] Layer 1 outputs:")
+    for agent_index, output in enumerate(results, start=1):
+        log(f"Agent {agent_index}: {output}\n")
 
     # Optional proposer layers 2..k
-    for layer_agents in proposer_layers[1:]:
+    for layer_index, layer_agents in enumerate(proposer_layers[1:], start=2):
+        log(f"\n[INFO] Layer {layer_index} outputs:")
         layer_system = _synthesize_prompt(synthesize_prompt, results)
         results = run_layer(layer_agents, layer_system, user_prompt)
         all_layer_results.append(results)
+        
+        for agent_index, output in enumerate(results, start=1):
+            log(f"Agent {agent_index}: {output}\n")
 
     # Final aggregation
     final_system = _synthesize_prompt(synthesize_prompt, results)
     final_decision = call(aggregator, final_system, user_prompt)
+    
+    log(f"\n[INFO] Final answer:\n{final_decision}\n")
     
     if return_intermediate:
         return final_decision, all_layer_results
